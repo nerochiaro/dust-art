@@ -1,14 +1,33 @@
 <template name="main">
   <h1 class="ui header">Nowhere Art Submissions 2015</h1>
   <div class="ui segment">
-  <div class="ui grid">
-    <div class="two wide column"><i class="ui icon cubes"></i> Installation</div>
-    <div class="two wide column"><i class="ui icon car"></i> Art Car</div>
-    <div class="two wide column"><i class="ui icon music"></i> Performance</div>
-    <div class="two wide column"><i class="ui icon university"></i> Workshop</div>
-  </div>
+    <div class="ui grid">
+      <div class="two wide column">Show art types:</div>
+      <div class="six wide column">
+      {{> artTypeSelector title="Installation" icon="cubes" type="installation"}}
+      {{> artTypeSelector title="Art Car" icon="car" type="car"}}
+      {{> artTypeSelector title="Performance" icon="music" type="performance"}}
+      {{> artTypeSelector title="Workshop" icon="university" type="workshop"}}
+      </div>
+      <div class="two wide column">
+        <div class="ui toggle checkbox">
+          <input id="show-only-funded" type="checkbox">
+          <label for="show-only-funded">Only funded</label>
+        </div>
+      </div>
+      <div class="two wide column">
+        <div class="ui toggle checkbox">
+          <input id="show-email-list" type="checkbox">
+          <label for="show-email-list">Show email list</label>
+        </div>
+      </div>
+    </div>
   </div>
   {{> submissions}}
+</template>
+
+<template name="artTypeSelector">
+  <div art-type="{{type}}" class="ui icon button {{isDisabled type=type}}"><i class="ui icon {{icon}}"></i>&nbsp;{{title}}</div>
 </template>
 
 <template name="sortHeader">
@@ -16,6 +35,9 @@
 </template>
 
 <template name="submissions">
+  {{#if showEmailList}}
+    {{> emailList submissions}}
+  {{/if}}
   <table class="ui celled table">
     <thead>
       <tr>
@@ -135,6 +157,15 @@
     </div>
     {{/if}}
 
+  </div>
+</template>
+
+<template name="emailList">
+  <div class="ui form segment">
+  <div class="field">
+  <label>Emails of all visible artists</label>
+  <textarea>{{emails}}</textarea>
+  </div>
   </div>
 </template>
 
