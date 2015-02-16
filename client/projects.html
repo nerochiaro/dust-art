@@ -1,0 +1,140 @@
+<template name="main">
+  <h1 class="ui header">Nowhere Art Submissions 2015</h1>
+  <div class="ui segment">
+  <div class="ui grid">
+    <div class="two wide column"><i class="ui icon cubes"></i> Installation</div>
+    <div class="two wide column"><i class="ui icon car"></i> Art Car</div>
+    <div class="two wide column"><i class="ui icon music"></i> Performance</div>
+    <div class="two wide column"><i class="ui icon university"></i> Workshop</div>
+  </div>
+  </div>
+  {{> submissions}}
+</template>
+
+<template name="sortHeader">
+  <th class="center aligned" sort-field="{{field}}">{{title}} <i class="ui icon {{sortIcon field=field}}"></i></th>
+</template>
+
+<template name="submissions">
+  <table class="ui celled table">
+    <thead>
+      <tr>
+        {{> sortHeader title='' field='art_type'}}
+        {{> sortHeader title='Artist' field='artist_name'}}
+        {{> sortHeader title='Title' field='art_title'}}
+        {{> sortHeader title='Request' field='fund_request'}}
+        {{> sortHeader title='Total' field='fund_total'}}
+        <th class="center aligned">Logistic Info</th>
+      </tr>
+    </thead>
+    {{#each submissions}}
+      {{> submission}}
+    {{/each}}
+  </table>
+  <div class="ui grid">
+    <div class="one wide column">&nbsp;</div>
+    <div class="fourteen wide column">
+      {{#each submissions}}
+        <div class="ui hidden divider"></div>
+        <div class="ui hidden divider"></div>
+        {{> fullSubmission}}
+      {{/each}}
+    </div>
+    <div class="one wide column">&nbsp;</div>
+  </div>
+</template>
+
+<template name="submission">
+  <tr>
+    <td><i class="ui icon {{icon}}"></i></td>
+    <td><a href="#{{anchor}}">{{art_title}}</a></td>
+    <td>{{artist_name}} (<a href="mailto:{{contact_email}}">{{contact_name}}</a>)</td>
+    <td class="right aligned"><b>{{#if isFunded}}{{fund_request}} &euro;{{/if}}</b></td>
+    <td class="right aligned">{{#if isFunded}}{{fund_total}} &euro;{{/if}}</td>
+    <td class="right aligned">{{logistics}}</td>
+  </tr>
+</template>
+
+<template name="box">
+  <div class="ui top attached orange header">
+    {{#if icon}}<i class="ui {{icon}} icon"></i>{{/if}}
+    {{title}}
+  </div>
+  {{#if subtitle}}
+  <div class="ui attached segment">{{subtitle}}</div>
+  {{/if}}
+  <div class="ui attached segment">{{content}}</div>
+</template>
+
+<template name="fullSubmission">
+  <a name="{{anchor}}">
+    <h2 class="ui block header"><i class="ui large icon {{icon}}"></i> {{art_title}} by {{artist_name}}</h2>
+  </a>
+  <div class="ui grid">
+    <div class="sixteen columns row">
+      <div class="eight wide column">
+        <div class="ui top attached orange header">Contact</div>
+        <div class="ui attached segment">
+          {{contact_name}} &lt;<a href="mailto:{{contact_email}}">{{contact_email}}</a>&gt;
+          {{#if contact_phone}}({{contact_phone}}){{/if}} Nationality: {{artist_nationality}}
+        </div>
+      </div>
+    </div>
+    <div class="sixteen columns row">
+      <div class="four wide column">
+        {{> box title="Artist Introduction" content=artist_introduction}}
+      </div>
+      <div class="four wide column">
+        {{> box title="Art Short Description" content=art_description}}
+      </div>
+      {{#if overview}}
+      <div class="eight wide column">
+        {{> box title="Art Overview" content=overview}}
+      </div>
+      {{/if}}
+    </div>
+    {{#if isFunded}}
+    <div class="sixteen columns row">
+      <div class="four wide column">
+        {{> box title="Budget" content=fund_budget subtitle=budgetAmount}}
+      </div>
+      {{#if hasExtra}}
+      <div class="four wide column">
+        {{> box title="Extra funds" content=fund_raise subtitle=budgetExtra icon=extraWarning}}
+      </div>
+      {{/if}}
+    </div>
+    {{/if}}
+    {{#if hasAnyPlans}}
+    <div class="sixteen columns row">
+      <div class="four wide column">
+        {{> box title="Plan A" content=fund_plan_a}}
+      </div>
+      <div class="four wide column">
+        {{> box title="Plan B" content=fund_plan_b}}
+      </div>
+    </div>
+    {{/if}}
+    {{#if hasAnyPlus}}
+    <div class="sixteen columns row">
+      {{#if fund_plus_awareness}}
+      <div class="four wide column">
+        {{> box title="Plus: Awareness" content=fund_plus_awareness}}
+      </div>
+      {{/if}}
+      {{#if fund_plus_green}}
+      <div class="four wide column">
+        {{> box title="Plus: Environment" content=fund_plus_green}}
+      </div>
+      {{/if}}
+      {{#if fund_plus_participation}}
+      <div class="four wide column">
+        {{> box title="Plan: Participation" content=fund_plus_participation}}
+      </div>
+      {{/if}}
+    </div>
+    {{/if}}
+
+  </div>
+</template>
+
