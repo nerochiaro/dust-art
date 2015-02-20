@@ -1,5 +1,6 @@
 <template name="main">
-  <h1 class="ui header">Nowhere Art Submissions 2015</h1>
+  <h1 class="ui centered inverted orange block  header">Nowhere Art Submissions 2015
+  </h1>
   <div class="ui segment">
     <div class="ui grid">
       <div class="two wide column">Show art types:</div>
@@ -10,20 +11,21 @@
       {{> artTypeSelector title="Workshop" icon="university" type="workshop"}}
       </div>
       <div class="two wide column">
-        <div class="ui toggle checkbox">
-          <input id="show-only-funded" type="checkbox">
-          <label for="show-only-funded">Only funded</label>
-        </div>
+        {{> checkbox label='Only funded' id='show-only-funded'}}
       </div>
       <div class="two wide column">
-        <div class="ui toggle checkbox">
-          <input id="show-email-list" type="checkbox">
-          <label for="show-email-list">Show email list</label>
-        </div>
+        {{> checkbox label='Show email list' id='show-email-list'}}
       </div>
     </div>
   </div>
   {{> submissions}}
+</template>
+
+<template name="checkbox">
+  <div class="ui toggle checkbox">
+    <input id="{{id}}" type="checkbox" checked="{{checked}}">
+    <label for="{{id}}">{{label}}</label>
+  </div>
 </template>
 
 <template name="artTypeSelector">
@@ -38,15 +40,16 @@
   {{#if showEmailList}}
     {{> emailList submissions}}
   {{/if}}
-  <table class="ui celled table">
+  <table class="ui celled table" id="mainlist">
     <thead>
       <tr>
         {{> sortHeader title='' field='art_type'}}
-        {{> sortHeader title='Artist' field='artist_name'}}
+        {{> sortHeader title='When' field='timestamp'}}
         {{> sortHeader title='Title' field='art_title'}}
+        {{> sortHeader title='Artist' field='artist_name'}}
         {{> sortHeader title='Request' field='fund_request'}}
         {{> sortHeader title='Total' field='fund_total'}}
-        <th class="center aligned">Logistic Info</th>
+        <th class="center aligned six wide">Logistic Info</th>
       </tr>
     </thead>
     {{#each submissions}}
@@ -69,7 +72,8 @@
 <template name="submission">
   <tr>
     <td><i class="ui icon {{icon}}"></i></td>
-    <td><a href="#{{anchor}}">{{art_title}}</a></td>
+    <td>{{humanTimestamp}}</td>
+    <td><a data-target="{{anchor}}" href="" class="innerlink">{{art_title}}</a></td>
     <td>{{artist_name}} (<a href="mailto:{{contact_email}}">{{contact_name}}</a>)</td>
     <td class="right aligned"><b>{{#if isFunded}}{{fund_request}} &euro;{{/if}}</b></td>
     <td class="right aligned">{{#if isFunded}}{{fund_total}} &euro;{{/if}}</td>
@@ -85,18 +89,23 @@
   {{#if subtitle}}
   <div class="ui attached segment">{{subtitle}}</div>
   {{/if}}
-  <div class="ui attached segment">{{content}}</div>
+  {{#if content}}
+  <div class="ui attached segment">{{#autolink}}{{{spaced content}}}{{/autolink}}</div>
+  {{/if}}
 </template>
 
 <template name="fullSubmission">
-  <a name="{{anchor}}">
-    <h2 class="ui block header"><i class="ui large icon {{icon}}"></i> {{art_title}} by {{artist_name}}</h2>
-  </a>
+  <h3 class="ui block header" id="anchor_{{anchor}}" style="position: relative">
+    <i class="ui icon {{icon}}" style="display: inline"></i>{{art_title}} by {{artist_name}}
+    <div class="ui top right attached orange label backlink">
+      <i class="ui up chevron icon"></i><a href="">Back to the list</a>
+    </div>
+  </h3>
   <div class="ui grid">
     <div class="sixteen columns row">
-      <div class="eight wide column">
-        <div class="ui top attached orange header">Contact</div>
-        <div class="ui attached segment">
+      <div class="sixteen wide column">
+        <div class="ui segment">
+          <div class="ui label">Contact</div>
           {{contact_name}} &lt;<a href="mailto:{{contact_email}}">{{contact_email}}</a>&gt;
           {{#if contact_phone}}({{contact_phone}}){{/if}} Nationality: {{artist_nationality}}
         </div>
@@ -117,24 +126,28 @@
     </div>
     {{#if isFunded}}
     <div class="sixteen columns row">
-      <div class="four wide column">
-        {{> box title="Budget" content=fund_budget subtitle=budgetAmount}}
-      </div>
       {{#if hasExtra}}
       <div class="four wide column">
         {{> box title="Extra funds" content=fund_raise subtitle=budgetExtra icon=extraWarning}}
       </div>
       {{/if}}
+      <div class="twelve wide column">
+        {{> box title="Budget" content=fund_budget subtitle=budgetAmount}}
+      </div>
     </div>
     {{/if}}
     {{#if hasAnyPlans}}
     <div class="sixteen columns row">
-      <div class="four wide column">
+      {{#if fund_plan_a}}
+      <div class="eight wide column">
         {{> box title="Plan A" content=fund_plan_a}}
       </div>
-      <div class="four wide column">
+      {{/if}}
+      {{#if fund_plan_b}}
+      <div class="eight wide column">
         {{> box title="Plan B" content=fund_plan_b}}
       </div>
+      {{/if}}
     </div>
     {{/if}}
     {{#if hasAnyPlus}}
@@ -157,13 +170,43 @@
     </div>
     {{/if}}
 
+    {{#if isInstallation}}
+    <div class="sixteen columns row">
+      <div class="four wide column">
+        {{> box title="Placement preference" subtitle=placementSummary content=install_placement_preferences}}
+      </div>
+      {{#if install_power_watts}}
+      <div class="four wide column">
+        {{> box title="Power needs" subtitle=install_power_watts content=install_power_devices}}
+      </div>
+      {{/if}}
+      {{#if install_safety_other}}
+      <div class="four wide column">
+        {{> box title="Safety notes" content=install_safety_other}}
+      </div>
+      {{/if}}
+    </div>
+    {{/if}}
+
+    {{#if isPerformanceOrWorkshop}}
+    <div class="sixteen columns row">
+      <div class="four wide column">
+        {{> box title="Performance Info" content=performanceSummary}}
+      </div>
+      {{#if performance_equipment}}
+      <div class="four wide column">
+        {{> box title="Equipment and logistics" content=performance_equipment}}
+      </div>
+      {{/if}}
+    </div>
+    {{/if}}
   </div>
 </template>
 
 <template name="emailList">
   <div class="ui form segment">
   <div class="field">
-  <label>Emails of all visible artists</label>
+  <label>Emails of all artists in the table below (change filtes above to refine selection)</label>
   <textarea>{{emails}}</textarea>
   </div>
   </div>

@@ -8,19 +8,18 @@ var icons = { "installation" : "cubes",
 if (Meteor.isClient) {
   Router.route('/', function() { this.render('main') });
 
-  Template.main.rendered = function() {
-    $("#show-only-funded").checkbox("setting", {
+  Template.checkbox.rendered = function() {
+    var id = this.data.id;
+    $("#" + id).checkbox("setting", {
       onChange: function()  {
-        Session.set('show-only-funded', $("#show-only-funded").prop("checked"))
-      }
-    });
-
-    $("#show-email-list").checkbox("setting", {
-      onChange: function()  {
-        Session.set('show-email-list', $("#show-email-list").prop("checked"))
+        Session.set(id, $("#" + id).prop("checked"))
       }
     });
   }
+
+  UI.registerHelper("spaced", function (text) {
+    return text.replace(/\n/g, "<br>");
+  });
 
   Template.submissions.helpers({
     submissions: function () {
@@ -92,9 +91,21 @@ if (Meteor.isClient) {
       case "installation": return this.install_size_x + "x" + this.install_size_y + "x" + this.install_height + "m" +
                                   (this.install_power_watts ? " / " + this.install_power_watts + "W" : "");
       case "workshop":
-      case "performance": return this.performance_duration + ", " + this.performance_frequency
+      case "performance": return [this.performance_duration, this.performance_frequency, this.performance_timeofday].join(", ")
       default: ""
       }
+    },
+    humanTimestamp: function() {
+      var t = moment(this.timestamp);
+      return t.format("MMM DD");
+    }
+  });
+
+  Template.submission.events({
+    'click .innerlink': function(event) {
+      event.preventDefault();
+      var target = "#anchor_" + $(event.currentTarget).attr('data-target');
+      $('html, body').animate({ scrollTop: $(target).offset().top }, 600);
     }
   });
 
@@ -124,6 +135,19 @@ if (Meteor.isClient) {
                                     this.fund_plus_participation.length > 0 },
     hasAnyPlans: function() { return this.fund_plan_a.length > 0 ||
                                      this.fund_plan_b.length > 0 },
+    isInstallation: function() { return this.art_type == "installation" },
+    isPerformanceOrWorkshop: function() { return this.art_type == "performance" || this.art_type == "workshop" },
+    isArtCar: function() { return this.art_type == "car" },
+
+    placementSummary: function() { return this.install_size_x + "x" + this.install_size_y + "x" + this.install_height + "m" },
+    performanceSummary: function() {
+      var summary = [];
+      if (this.performance_duration) summary.push("Duration: " + this.performance_duration);
+      if (this.performance_frequency) summary.push("Frequency: " + this.performance_frequency);
+      if (this.performance_timeofday) summary.push("Preferred time: " + this.performance_timeofday);
+      return summary.join("<br>");
+    },
+
     budgetAmount: function() {
       if (this.art_funding == "yes") {
         var tot = parseInt(this.fund_total, 10);
@@ -140,8 +164,19 @@ if (Meteor.isClient) {
     extraWarning: function() { return (parseInt(this.fund_total, 10) - parseInt(this.fund_request, 10) > 0 &&
                                        this.fund_raise.length == 0) ? "warning sign" : "" },
     overview: function() {
-      return { "installation" : this.install_overview,
-               "performance" : this.performance_overview }[this.art_type] || "";
+      return {
+              "installation" : this.install_overview,
+              "performance" : this.performance_overview,
+              "workshop" : this.performance_overview,
+              "car": this.performance_outline  /* BUG: should be car_overview but too risky to fix for 2015 */
+      }[this.art_type] || "";
     }
   })
+
+  Template.fullSubmission.events({
+    'click .backlink': function(event) {
+      event.preventDefault();
+      $('html, body').animate({ scrollTop: 0 }, 600);
+    }
+  });
 }
